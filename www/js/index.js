@@ -34,9 +34,65 @@ var app = {
     // function, we must explicitly call 'app.receivedEvent(...);'
     onDeviceReady: function() {
         app.receivedEvent('deviceready');
+		app.getCurrentPosition();
     },
+	
+	getCurrentPosition: function() 
+	{
+		navigator.geolocation.getCurrentPosition(onSuccess, onError);
+		
+		function onSuccess(position) 
+		{
+        	var location = document.getElementById('geolocation');
+			//console.log('Latitude: ' + position.coords.latitude + '<br />' + 'Longitude: ' + position.coords.longitude + '<br />');
+						
+			location.innerHTML = 'Latitude: ' + position.coords.latitude + '<br />' + 'Longitude: ' + position.coords.longitude + '<br />';
+			var latitude = position.coords.latitude;
+			var longitude = position.coords.longitude;
+			
+			var getLocationButton = document.getElementById("locationButton");
+			getLocationButton.addEventListener("click", getLocation(latitude,longitude), false);
+			//function(){modifyText("four")}
+        }
+
+    	// onError Callback receives a PositionError object
+
+        function onError(error) 
+		{
+              alert('code: '    + error.code    + '\n' +
+              'message: ' + error.message + '\n');
+        }
+		
+		function getLocation(latitude,longitude)
+		{
+        console.log("calling xhr" + latitude + longitude);
+        var request = XMLHttpRequest();
+        request.open("GET", 
+            "http://open.mapquestapi.com/geocoding/v1/reverse?" + "key=Fmjtd|luur2hurn0%2Cbg%3Do5-9wasly&location=" + latitude + "," + longitude, true);
+        request.onreadystatechange = function() 
+		{
+        	if (request.readyState == 4) 
+			{
+                	if (request.status == 200 || request.status == 0) 
+					{
+                    	var books = JSON.parse(request.responseText);
+                    	console.log(books.results[0].locations[0].adminArea5);
+						var location = document.getElementById('geolocation');
+						location.innerHTML = 'Latitude: ' + latitude + '<br />' + 'Longitude: ' + longitude + '<br />' + books.results[0].locations[0].adminArea5;
+                	}
+        	}
+        };
+        request.send();
+	}
+	
+		
+		
+	},
+
+	
     // Update DOM on a Received Event
-    receivedEvent: function(id) {
+    receivedEvent: function(id) 
+	{
         var parentElement = document.getElementById(id);
         var listeningElement = parentElement.querySelector('.listening');
         var receivedElement = parentElement.querySelector('.received');
